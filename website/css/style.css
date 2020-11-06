@@ -1,0 +1,44 @@
+#layout {
+    min-height: 100vh;
+}
+
+/* ------------------------------------------------- */
+/* About pure-menu */
+.pure-menu {
+    display: flex;
+    justify-content: space-around;
+    align-content: center;
+    height: 50px;
+    background-color: blueviolet;
+}
+
+.pure-menu-link:hover {
+    background: none;
+}
+
+.pure-menu-heading,
+.pure-menu-list {
+    align-self: center;
+}
+
+.pure-menu-list {
+    padding: 10px;
+}
+
+.pure-menu-link {
+    color: rgb(209, 179, 236);
+}
+
+.pure-menu-selected .pure-menu-link,
+.pure-menu-heading {
+    color: white;
+}
+
+.pure-menu-heading {
+    font-size: 25px;
+}
+
+
+/* ------------------------------------------------- */
+/* About ??? */
+
