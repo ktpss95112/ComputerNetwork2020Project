@@ -1,6 +1,13 @@
-#layout {
+body {
     min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
+
+nav { min-height: 50px; }
+footer { min-height: 50px; margin-top:auto; }
+
 
 /* ------------------------------------------------- */
 /* About pure-menu */
@@ -8,7 +15,6 @@
     display: flex;
     justify-content: space-around;
     align-content: center;
-    height: 50px;
     background-color: blueviolet;
 }
 
@@ -40,5 +46,18 @@
 
 
 /* ------------------------------------------------- */
-/* About ??? */
+/* About footer */
+footer {
+    border-top: solid thin lightgray;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+footer span,
+footer a {
+    color: rgb(177, 158, 216);
+    font-size: small;
+}
 
