@@ -11,7 +11,8 @@ namespace http {
 
 enum method {
     GET,
-    POST
+    POST,
+    HEAD,
 };
 const std::unordered_map<std::string, method> str2method{
     {"GET", GET},
@@ -56,14 +57,14 @@ enum http_status_code {
     HTTP_STATUS_Internal_Server_Error = 500,
 };
 const std::unordered_map<http_status_code, std::string> http_status2str{
-    {HTTP_STATUS_OK, "200 OK"},
+    {HTTP_STATUS_OK, "OK"},
 
-    {HTTP_STATUS_Bad_Request, "400 Bad Request"},
-    {HTTP_STATUS_Not_Found, "404 Not Found"},
-    {HTTP_STATUS_URI_Too_Long, "414 URI Too Long"},
-    {HTTP_STATUS_Request_Header_Fields_Too_Large, "431 Request Header Fields Too Large"},
+    {HTTP_STATUS_Bad_Request, "Bad Request"},
+    {HTTP_STATUS_Not_Found, "Not Found"},
+    {HTTP_STATUS_URI_Too_Long, "URI Too Long"},
+    {HTTP_STATUS_Request_Header_Fields_Too_Large, "Request Header Fields Too Large"},
 
-    {HTTP_STATUS_Internal_Server_Error, "500 Internal Server Error"},
+    {HTTP_STATUS_Internal_Server_Error, "Internal Server Error"},
 };
 
 

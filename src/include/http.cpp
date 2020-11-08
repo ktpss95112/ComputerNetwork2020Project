@@ -199,6 +199,11 @@ std::string Request::get_http_version () {
 }
 
 
+std::string Request::get_path () {
+    return path_;
+}
+
+
 bool Request::has_error () {
     return has_error_;
 }
@@ -261,43 +266,55 @@ bool Response::set_status_code (http_status_code code) {
 }
 
 
-bool Response::prepare_html (const std::string &content) {
-    set_body(content);
-    add_header(HTTP_HEADER_Content_Type, "text/html");
+bool Response::prepare_body (const std::string &content, const std::string &content_type) {
+    if (content_type != "text/html"
+        && content_type != "text/css"
+        && content_type != "text/javascript"
+        && content_type != "image/jpeg") {
 
-    return true;
-}
+        return false;
+    }
 
+    if (set_body(content)
+        && add_header(HTTP_HEADER_Content_Type, content_type)) {
 
-bool Response::prepare_css (const std::string &content) {
-    set_body(content);
-    add_header(HTTP_HEADER_Content_Type, "text/css");
+        return true;
+    }
 
-    return true;
-}
-
-
-bool Response::prepare_js (const std::string &content) {
-    set_body(content);
-    add_header(HTTP_HEADER_Content_Type, "text/javascript");
-
-    return true;
+    return false;
 }
 
 
 bool Response::prepare_status_code (http_status_code code) {
     switch (code) {
-    case HTTP_STATUS_Internal_Server_Error: {
+    case HTTP_STATUS_Not_Found: {
 
         http_status_code_ = code;
         headers_.clear();
-        body_.clear();
+        set_body("Not Found");
 
         return true;
     }
 
-    default:
-        return false;
+    case HTTP_STATUS_Internal_Server_Error: {
+
+        http_status_code_ = code;
+        headers_.clear();
+        set_body("Internal Server Error");
+
+        return true;
+    }
+
+    default: {
+        try {
+            std::cerr << "[warn] prepare_status_code " << http_status2str.at(code) << " not implemented" << std::endl;
+        }
+        catch (const std::out_of_range &e) {
+            std::cerr << "status code " << code << " is not implemented" << std::endl;
+        }
+        return true;
+    }
+
     }
 }
 
@@ -362,7 +379,7 @@ bool Response::send (int clientfd) {
     }
 
     // message-body
-    if (fwrite(body_.c_str(), body_.size(), 1, fp) != 1) {
+    if (body_.size() != 0 && fwrite(body_.c_str(), body_.size(), 1, fp) != 1) {
         set_error("error on fwrite (body)");
         return false;
     }

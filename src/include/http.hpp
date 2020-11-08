@@ -42,6 +42,7 @@ public:
 
     bool receive_and_parse ();
     std::string get_http_version ();
+    std::string get_path ();
 
     bool has_error ();
     std::tuple<http_status_code, std::string> get_error ();
@@ -72,9 +73,7 @@ public:
     bool set_status_code (http_status_code code);
 
     // some high level operation of the response
-    bool prepare_html (const std::string &content);
-    bool prepare_css (const std::string &content);
-    bool prepare_js (const std::string &content);
+    bool prepare_body (const std::string &content, const std::string &content_type);
     bool prepare_status_code(http_status_code code);
 
     bool send (int clientfd);

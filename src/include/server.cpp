@@ -2,6 +2,7 @@
 #include <string>
 #include <tuple>
 #include <thread>
+#include <functional>
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
@@ -39,7 +40,7 @@ std::tuple<std::string, int> get_ip_port_from_socket (int sockfd) {
 }
 
 
-Server::Server (std::string ip_address, int port, Handler conn_handler)
+Server::Server (std::string ip_address, int port, Handle_function conn_handler)
 : ip_address_(ip_address), port_(port), conn_handler_(conn_handler) {
 
     addrinfo hints;
