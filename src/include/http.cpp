@@ -38,6 +38,9 @@ bool Request::parse_method () {
         return false;
     }
 
+    all_str_ += buf;
+    all_str_ += " ";
+
     try {
         method_ = str2method.at(buf);
     }
@@ -62,6 +65,9 @@ bool Request::parse_path_and_query () {
         set_error(HTTP_STATUS_URI_Too_Long, "request-uri too long");
         return false;
     }
+
+    all_str_ += buf;
+    all_str_ += " ";
 
     std::string tmp = buf;
     size_t pos = tmp.find("?");
@@ -91,6 +97,9 @@ bool Request::parse_version () {
         set_error(HTTP_STATUS_Bad_Request, "bad HTTP version");
         return false;
     }
+
+    all_str_ += buf;
+    all_str_ += "\r\n";
 
     if (!std::regex_match(std::string{buf}, std::regex{"^HTTP/[0-9]+\\.[0-9]+$"})) {
         set_error(HTTP_STATUS_Bad_Request, "bad HTTP version");
@@ -131,6 +140,8 @@ bool Request::parse_headers () {
             }
         }
 
+        all_str_ += line;
+
         size_t pos = line.find(":");
         if (pos == std::string::npos) {
             set_error(HTTP_STATUS_Bad_Request, "bad header");
@@ -157,7 +168,6 @@ bool Request::parse_body () {
         return true;
     }
 
-
     size_t max_body_length = std::min((2l << 30), std::stol(headers_.at(HTTP_HEADER_Content_Length))); // < 1 GB
 
     int n;
@@ -170,6 +180,8 @@ bool Request::parse_body () {
             break;
         }
     }
+
+    all_str_ += body_;
 
     return true;
 }
@@ -204,6 +216,11 @@ std::string Request::get_path () {
 }
 
 
+std::string Request::get_py_handler_string () {
+    return all_str_;
+}
+
+
 bool Request::has_error () {
     return has_error_;
 }
@@ -233,7 +250,7 @@ void Request::debug () {
 }
 
 
-Response::Response (std::string http_version) : has_error_(false), http_version_(http_version), http_status_code_(HTTP_STATUS_OK) {
+Response::Response (std::string http_version) : has_error_(false), http_version_(http_version), http_status_code_(HTTP_STATUS_OK), from_py_handler_(false) {
 
 }
 
@@ -319,6 +336,13 @@ bool Response::prepare_status_code (http_status_code code) {
 }
 
 
+bool Response::prepare_from_py_handler (const std::string &py_handler_result) {
+    from_py_handler_ = true;
+    py_handler_result_ = py_handler_result;
+    return true;
+}
+
+
 void Response::set_error (const std::string &msg) {
     has_error_ = true;
     error_msg_ = msg;
@@ -331,6 +355,17 @@ bool Response::send (int clientfd) {
     if ((fp = fdopen(clientfd, "w")) == nullptr) {
         set_error(std::string{"fdopen: "} + std::strerror(errno));
         return false;
+    }
+    setvbuf(fp, NULL, _IONBF, 0);
+
+    if (from_py_handler_) {
+        if (fwrite(py_handler_result_.c_str(), py_handler_result_.size(), 1, fp) != 1) {
+            set_error("error on fwrite (py_handler_result_)");
+            return false;
+        }
+
+        fclose(fp);
+        return true;
     }
 
     std::string SP{" "};

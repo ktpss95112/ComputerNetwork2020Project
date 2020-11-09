@@ -62,6 +62,11 @@ Server::Server (std::string ip_address, int port, Handle_function conn_handler)
         std::exit(EXIT_FAILURE);
     }
 
+    if (int optval = 1; setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1 ) {
+        std::cerr << "Error on setsockopt, errno = " << errno << ": " << std::strerror(errno) << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
     if (bind(sockfd_, res->ai_addr, res->ai_addrlen) == -1) {
         std::cerr << "Error on bind, errno = " << errno << ": " << std::strerror(errno) << std::endl;
         std::exit(EXIT_FAILURE);

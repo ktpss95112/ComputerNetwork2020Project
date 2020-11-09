@@ -16,6 +16,7 @@ class Request {
 private:
     int clientfd_;
     FILE *fp_;
+    std::string all_str_;
 
     bool has_error_;
     http_status_code error_status_code_;
@@ -47,6 +48,8 @@ public:
     bool has_error ();
     std::tuple<http_status_code, std::string> get_error ();
 
+    std::string get_py_handler_string ();
+
     void debug ();
 };
 
@@ -60,6 +63,9 @@ private:
     http_status_code http_status_code_;
     HTTP_Header headers_;
     std::string body_;
+
+    bool from_py_handler_;
+    std::string py_handler_result_;
 
     void set_error (const std::string &msg);
 
@@ -75,6 +81,7 @@ public:
     // some high level operation of the response
     bool prepare_body (const std::string &content, const std::string &content_type);
     bool prepare_status_code(http_status_code code);
+    bool prepare_from_py_handler (const std::string &py_handler_result);
 
     bool send (int clientfd);
 

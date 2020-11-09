@@ -20,3 +20,4 @@ $(INC)/http.o: $(INC)/http.cpp $(INC)/http.hpp $(INC)/definitions.hpp
 
 clean:
 	rm -f $(INC)/*.o *.o $(TARGET)
+	rm -rf py_handler/__pycache__
