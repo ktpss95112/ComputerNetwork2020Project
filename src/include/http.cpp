@@ -284,14 +284,6 @@ bool Response::set_status_code (http_status_code code) {
 
 
 bool Response::prepare_body (const std::string &content, const std::string &content_type) {
-    if (content_type != "text/html"
-        && content_type != "text/css"
-        && content_type != "text/javascript"
-        && content_type != "image/jpeg") {
-
-        return false;
-    }
-
     if (set_body(content)
         && add_header(HTTP_HEADER_Content_Type, content_type)) {
 

@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "../include/definitions.hpp"
 #include "../include/server.hpp"
 #include "../include/http.hpp"
 #include "handler.hpp"
@@ -24,31 +25,38 @@ Handler::~Handler() {
 
 void Handler::route (http::Request &req, http::Response &resp) {
     std::string path = req.get_path();
-    if (path == "/"
-        || path == "/index.html"
-        || path == "/css/style.css"
-        || path == "/img/avatar.jpg") {
 
-        if (path == "/") path = "/index.html";
-        std::filesystem::path file_path = root_dir_ / path.substr(1);
-
-        std::ifstream fin{file_path, std::ios::binary};
-        if (!fin.is_open()) {
-            std::cerr << "cannot open " << file_path << std::endl;
-            resp.prepare_status_code(http::HTTP_STATUS_Internal_Server_Error);
-        }
-        else {
-            std::stringstream buf;
-            buf << fin.rdbuf();
-
-            if (path[path.size()-1] == 'g')      resp.prepare_body(buf.str(), "image/jpeg");
-            else if (path[path.size()-1] == 's') resp.prepare_body(buf.str(), "text/css");
-            else                                 resp.prepare_body(buf.str(), "text/html");
-        }
-
-    }
-    else {
+    if (path.rfind("/api", 0) == 0) {
         py_handler(req, resp);
+        return;
+    }
+
+    // get rid of any path containing ".."
+    if (path.find("..") != std::string::npos) {
+        std::cerr << "the path contains \"..\"" << std::endl;
+        resp.prepare_status_code(http::HTTP_STATUS_Not_Found);
+        return;
+    }
+
+    if (path == "/") path = "/index.html";
+    std::filesystem::path file_path = root_dir_ / path.substr(1);
+
+    std::ifstream fin{file_path, std::ios::binary};
+    if (!fin.is_open()) {
+        std::cerr << "cannot open " << file_path << std::endl;
+        resp.prepare_status_code(http::HTTP_STATUS_Not_Found);
+        return;
+    }
+
+    std::stringstream buf;
+    buf << fin.rdbuf();
+
+    try {
+        resp.prepare_body(buf.str(), http::file_ext2content_type.at(file_path.extension()));
+    }
+    catch (const std::out_of_range &e) {
+        std::cerr << "[warn] unknown file extension: " << file_path.extension() << ", treat as text/plain" << std::endl;
+        resp.prepare_body(buf.str(), "text/plain");
     }
 }
 

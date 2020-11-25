@@ -68,6 +68,16 @@ const std::unordered_map<http_status_code, std::string> http_status2str{
 };
 
 
+const std::unordered_map<std::string, std::string> file_ext2content_type{
+    {".html", "text/html"},
+    {".css", "text/css"},
+    {".js", "text/javascript"},
+    {".txt", "text/plain"},
+    {".jpg", "image/jpeg"},
+    {".jpeg", "image/jpeg"},
+};
+
+
 typedef std::unordered_map<http_header, std::string> HTTP_Header;
 
 
