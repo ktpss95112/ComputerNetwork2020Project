@@ -77,6 +77,8 @@ Server::Server (std::string ip_address, int port, Handle_function conn_handler)
         std::exit(EXIT_FAILURE);
     }
 
+    std::cerr << "Listening on " << ip_address << ":" << port << " ... " << std::endl;
+
     freeaddrinfo(res);
 }
 

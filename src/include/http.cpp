@@ -321,6 +321,15 @@ bool Response::prepare_status_code (http_status_code code) {
         return true;
     }
 
+    case HTTP_STATUS_Bad_Request: {
+
+        http_status_code_ = code;
+        headers_.clear();
+        set_body("Bad Request");
+
+        return true;
+    }
+
     default: {
         try {
             std::cerr << "[warn] prepare_status_code " << http_status2str.at(code) << " not implemented" << std::endl;
