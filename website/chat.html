@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Barlow">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/base-min.css">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="https://unpkg.com/vue@3.0.3"></script>
+
+    <title>Home Page</title>
+  </head>
+  <body>
+
+    <main id="chat-app">
+      <div id="display">
+        <div v-for="chat in chatListSorted" class="chat-container">
+          <div class="chat-information-bar">
+            <div class="chat-username"> {{ chat.user }} </div>
+            <div class="chat-timestamp"> {{ chat.timestamp }} </div>
+          </div>
+          <div class="chat-content"> {{ chat.content }} </div>
+        </div>
+
+      </div>
+      <div id="inputarea">
+        <div>
+          <span>Your Name: </span><input v-model="username" type="text" required>
+        </div>
+        <div>
+          <textarea id="input-content" v-model="inputText" placeholder="say something"></textarea>
+        </div>
+        <div>
+          <button id="send" @click="send">send</button>
+        </div>
+      </div>
+    </main>
+
+    <script src="/js/nav&footer.js"></script>
+    <script src="/js/chat.js"></script>
+
+  </body>
+</html>

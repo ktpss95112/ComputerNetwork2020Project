@@ -77,6 +77,9 @@ footer a {
 main {
     max-width: 900px;
     margin: 0 auto;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .row {
@@ -95,4 +98,57 @@ main {
 .img {
     max-width: 100%;
     max-height: 100%;
+}
+
+
+/* ------------------------------------------------- */
+/* About chat-app */
+#chat-app textarea {
+    resize: none;
+}
+
+#input-content {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#display {
+    padding-bottom: 10px;
+}
+
+#chat-app .chat-container {
+    background-color: #dcd6f7;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+#chat-app .chat-information-bar {
+    width: 100%;
+    position: relative;
+}
+
+#chat-app .chat-username {
+    display: inline-block;
+    box-sizing: border-box;
+    font-size: 120%;
+    background-color: #a6b1e1;
+    padding: 2px;
+}
+
+#chat-app .chat-timestamp {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: gray;
+    font-size: 80%;
+}
+
+#chat-app .chat-content {
+    width: 100%;
+    padding: 5px;
+}
+
+#send {
+    float: right;
 }
