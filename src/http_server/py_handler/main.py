@@ -1,26 +1,27 @@
 #/usr/bin/env python3
 
 import sys
+import traceback
 
-from handler import Request
+from handler import Request, die, route
 
 
 def parse_input() -> Request:
     len_ = int(sys.stdin.buffer.readline())
     data = sys.stdin.buffer.read(len_)
 
-    return Request()
+    return Request.from_raw(data)
 
 
 def main():
+    try:
+        req = parse_input()
+        route(req)
 
-    req = parse_input()
+    except Exception as e:
+        traceback.print_exc()
 
-    data = b'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 5\r\n\r\nHello'
-    sys.stdout.write(f'{len(data)}\n')
-    sys.stdout.flush()
-    sys.stdout.buffer.write(data)
-    sys.stdout.flush()
+    die()
 
 
 if __name__ == "__main__":
