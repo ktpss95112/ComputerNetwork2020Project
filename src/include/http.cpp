@@ -123,7 +123,10 @@ bool Request::parse_headers () {
 
     while (fgets(buf, 1000, fp_) != nullptr) {
         std::string line{buf};
-        if (line == "\r\n") break;
+        if (line == "\r\n") {
+            all_str_ += "\r\n";
+            break;
+        }
         if (line.size() < 2) {
             set_error(HTTP_STATUS_Bad_Request, "bad header");
             return false;
@@ -168,20 +171,24 @@ bool Request::parse_body () {
         return true;
     }
 
-    size_t max_body_length = std::min((2l << 30), std::stol(headers_.at(HTTP_HEADER_Content_Length))); // < 1 GB
+    size_t len = std::stol(headers_.at(HTTP_HEADER_Content_Length));
 
-    int n;
-    char buf[8192 + 1] = {0};
-    while ((n = fread(buf, 1, 8192, fp_)) > 0) {
-        buf[n] = '\0';
-        body_ += buf;
-
-        if (body_.size() >= max_body_length) {
-            break;
-        }
+    char *buf;
+    try {
+        buf = new char [len+1];
+    }
+    catch (std::bad_alloc &e) {
+        set_error(HTTP_STATUS_Internal_Server_Error, "error on buf = new char [len+1]");
+        return false;
     }
 
+    // TODO: timeout a read
+    size_t n = fread(buf, 1, len, fp_);
+    buf[n] = '\0';
+    body_ += buf;
+
     all_str_ += body_;
+    delete [] buf;
 
     return true;
 }

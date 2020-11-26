@@ -133,8 +133,26 @@ void Handler::py_handler (http::Request &req, http::Response &resp) {
         return;
     }
 
-    size_t len{std::stoul(buf)};
-    char *buf2 = new char [len+1];
+    size_t len;
+    try {
+        len = std::stoul(buf);
+    }
+    catch (const std::invalid_argument &e) {
+        std::cerr << "error on std::stoul(buf), buf = " << buf << std::endl;
+        resp.prepare_status_code(http::HTTP_STATUS_Internal_Server_Error);
+        return;
+    }
+
+    char *buf2;
+    try {
+        buf2 = new char [len+1];
+    }
+    catch (std::bad_alloc &e) {
+        std::cerr << "error on buf2 = new char [len+1]" << std::endl;
+        resp.prepare_status_code(http::HTTP_STATUS_Internal_Server_Error);
+        return;
+    }
+
     if (fread(buf2, 1, len, fp_from_py) != len) {
         std::cerr << "error on fread(fp_from_py), errno = " << errno << " : " << std::strerror(errno) << std::endl;
         resp.prepare_status_code(http::HTTP_STATUS_Internal_Server_Error);
