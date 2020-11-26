@@ -149,6 +149,28 @@ main {
     padding: 5px;
 }
 
-#send {
+#input-area button {
     float: right;
+}
+
+#input-area, #login-area {
+    height: 30vh;
+}
+
+#login-area {
+    margin: auto auto;
+    max-width: 300px;
+}
+
+#login-area .line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 3px;
+}
+
+#login-area .buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }

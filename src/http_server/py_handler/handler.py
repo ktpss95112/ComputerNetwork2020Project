@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass
 
 from chat import Chat
+from user import User
 
 
 def send_and_exit(data):
@@ -34,7 +35,7 @@ class Request:
     method: bytes
     path: bytes
     http_version: bytes
-    headers: dict
+    headers: list
     body: bytes
 
 
@@ -51,11 +52,11 @@ class Request:
 
         lines = head.split(b'\r\n')
 
-        headers = {
-            key.strip() : value.strip()
+        headers = [
+            (key.strip(), value.strip())
             for line in lines[1:]
             for key, _, value in [line.partition(b':')]
-        }
+        ]
 
         return cls(method, path, version, headers, body)
 
@@ -72,7 +73,19 @@ def route(req: Request):
                 get_chat(_id)
 
         elif req.method == b'POST' and req.path == b'/api/chat':
-            post_chat(req.body)
+            post_chat(req.headers, req.body)
+
+    elif req.path == b'/api/register':
+        if req.method == b'POST':
+            register_user(req.body)
+
+    elif req.path == b'/api/login':
+        if req.method == b'POST':
+            login_user(req.body)
+
+    elif req.path.startswith(b'/api/username/'):
+        if req.method == b'GET':
+            get_username_by_session(req.path[14:].decode())
 
 
 def get_chat_size():
@@ -93,13 +106,65 @@ def get_chat(_id):
     die_send_json(data)
 
 
-def post_chat(data):
+def post_chat(headers, data):
+    user = User()
+
+    # check cookie
+    for h in headers:
+        if h[0] == b'Cookie':
+            cookies = {
+                key.strip(): value.strip()
+                for part in h[1].split(b';')
+                for key, _, value in [part.partition(b'=')]
+            }
+            success, username = user.get_username_by_session(cookies[b'session_id'].decode())
+            if success:
+                break
+    else:
+        die()
+
+    # process user request
     data = json.loads(data)
     chat = Chat()
 
-    _id = chat.create(data['user'], data['content'])
+    _id = chat.create(username, data['content'])
 
     data = chat.get_one_by_id(_id)
 
     data = json.dumps(data)
+    die_send_json(data)
+
+
+def register_user(data):
+    data = json.loads(data)
+    user = User()
+
+    if user.register(data['username'], data['password']):
+        die_ok()
+    else:
+        die()
+
+
+def login_user(data):
+    data = json.loads(data)
+    user = User()
+
+    success, session_id = user.login(data['username'], data['password'])
+
+    if not success:
+        die()
+
+    data = json.dumps({ 'session_id': session_id })
+    die_send_json(data)
+
+
+def get_username_by_session(session_id):
+    user = User()
+
+    success, username = user.get_username_by_session(session_id)
+
+    if not success:
+        die()
+
+    data = json.dumps({ 'username': username })
     die_send_json(data)

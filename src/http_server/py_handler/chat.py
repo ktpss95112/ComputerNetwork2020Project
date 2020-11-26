@@ -1,18 +1,14 @@
 import sqlite3
 
+from init_db import init_db
+
 
 class Chat:
     def __init__(self):
         self.conn = sqlite3.connect('data.db', isolation_level=None)
         c = self.conn.cursor()
 
-        c.execute('CREATE TABLE IF NOT EXISTS chat ('
-            'id        INTEGER PRIMARY KEY AUTOINCREMENT,'
-            "timestamp DATETIME DEFAULT (datetime(CURRENT_TIMESTAMP, 'localtime')),"
-            'user      TEXT NOT NULL,'
-            'content   TEXT NOT NULL'
-            ')'
-        )
+        init_db(c)
 
 
     def get_size(self):

@@ -24,17 +24,31 @@
           </div>
           <div class="chat-content"> {{ chat.content }} </div>
         </div>
-
       </div>
-      <div id="inputarea">
+
+      <div v-if="hasLoggedIn" id="input-area">
         <div>
-          <span>Your Name: </span><input v-model="username" type="text" required>
+          <span>Your Name: {{ username }} </span>
         </div>
         <div>
           <textarea id="input-content" v-model="inputText" placeholder="say something"></textarea>
         </div>
         <div>
-          <button id="send" @click="send">send</button>
+          <button @click="logout">logout</button>
+          <button @click="send">send</button>
+        </div>
+      </div>
+      <div v-else id="login-area">
+        <div class="line">
+          <label>Username: </label> <input v-model="loginAreaUsername" type="text">
+        </div>
+        <div class="line">
+          <label>Password: </label> <input v-model="loginAreaPassword" type="password">
+        </div>
+        <div class="line buttons">
+          <span v-if="statusMsg !== ''"> {{ statusMsg }} </span>
+          <button @click="register">Register</button>
+          <button @click="login">Login</button>
         </div>
       </div>
     </main>

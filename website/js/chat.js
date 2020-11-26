@@ -4,6 +4,10 @@ Vue.createApp({
             chatList: [],
             username: '',
             inputText: '',
+            hasLoggedIn: false,
+            statusMsg: '',
+            loginAreaUsername: '',
+            loginAreaPassword: '',
         }
     },
     computed: {
@@ -12,7 +16,7 @@ Vue.createApp({
         },
         chatSize () {
             return this.chatList.length;
-        }
+        },
     },
     methods: {
         updateChatIfServerIsNewer () {
@@ -33,7 +37,6 @@ Vue.createApp({
             .then(resp => resp.json())
             .then(data => {
                 _this.chatList = data;
-                _this.chatSize = _this.chatList.length;
             });
         },
         fetchOneChatById (id, callback) {
@@ -44,7 +47,6 @@ Vue.createApp({
         send () {
             let _this = this;
             let data = {
-                user: _this.username,
                 content: _this.inputText,
             };
 
@@ -54,7 +56,6 @@ Vue.createApp({
             })
             .then(resp => {
                 if (!resp.ok) {
-                    _this.hasError = true;
                     return;
                 }
 
@@ -63,17 +64,93 @@ Vue.createApp({
                     // TODO: more efficient way to update
                     _this.updateAllChat();
 
-                    console.log(data);
-                    _this.hasError = false;
                     _this.inputText = '';
                 });
             });
-        }
+        },
+        register () {
+            let _this = this;
+            let data = {
+                username: _this.loginAreaUsername,
+                password: _this.loginAreaPassword,
+            };
+
+            _this.statusMsg = 'Processing ... ';
+
+            fetch('/api/register', {
+                body: JSON.stringify(data),
+                method: 'POST',
+            })
+            .then(resp => {
+                if (!resp.ok) {
+                    _this.statusMsg = 'Register failed!';
+                }
+                else {
+                    _this.statusMsg = 'Register Success!';
+                }
+                _this.loginAreaUsername = '';
+                _this.loginAreaPassword = '';
+            });
+        },
+        login () {
+            let _this = this;
+            let data = {
+                username: _this.loginAreaUsername,
+                password: _this.loginAreaPassword,
+            };
+
+            _this.statusMsg = 'Processing ... ';
+
+            fetch('/api/login', {
+                body: JSON.stringify(data),
+                method: 'POST',
+            })
+            .then(resp => {
+                if (!resp.ok) {
+                    _this.statusMsg = 'Login failed!';
+                    return;
+                }
+
+                resp.json()
+                .then(data => {
+                    // set cookie
+                    document.cookie = `session_id=${data.session_id}`;
+                    _this.hasLoggedIn = true;
+                    _this.username = _this.loginAreaUsername;
+                    _this.statusMsg = '';
+                })
+            });
+        },
+        logout () {
+            let _this = this;
+
+            _this.hasLoggedIn = false;
+            _this.statusMsg = '';
+            _this.loginAreaUsername = '';
+            _this.loginAreaPassword = '';
+
+            document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        },
     },
     created () {
         let _this = this;
         _this.updateAllChat();
 
+        // update chat every 1 second
         setInterval(_this.updateChatIfServerIsNewer, 1000);
+
+        // check login state
+        if (document.cookie.split('; ').some((item) => item.trim().startsWith('session_id'))) {
+            // session_id exists
+            _this.hasLoggedIn = true;
+            let session_id = document.cookie.split('; ').find(row => row.startsWith('session_id')).split('=')[1];
+
+            // update username
+            fetch(`/api/username/${session_id}`)
+            .then(resp => resp.json())
+            .then(data => {
+                _this.username = data.username;
+            });
+        }
     }
 }).mount('#chat-app');
