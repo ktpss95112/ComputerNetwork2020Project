@@ -48,8 +48,54 @@ void Handler::route (http::Request &req, http::Response &resp) {
         return;
     }
 
+    bool success_handle_range {false};
     std::stringstream buf;
-    buf << fin.rdbuf();
+    http::HTTP_Header &headers {req.get_http_headers()};
+    if (headers.find(http::HTTP_HEADER_Range) != headers.end()) {
+        // currently only support below formats:
+        // Range: <unit>=<range-start>-
+        // Range: <unit>=<range-start>-<range-end>
+        // Range: <unit>=-<suffix-length>
+        try {
+            size_t file_size;
+            fin.seekg(0, fin.end);
+            file_size = fin.tellg();
+
+            char unit[10];
+            size_t range_start = 0, range_end = file_size - 1;
+            if (2 == std::sscanf(headers[http::HTTP_HEADER_Range].c_str(), "%5s=%ld-%ld", unit, &range_start, &range_end)) {
+                if (range_end == file_size - 1) {
+                    // <range-end> not specified
+                }
+                else {
+                    // <suffix-length> is provided
+                    range_start = range_end;
+                    range_end = file_size - 1;
+                }
+            }
+
+            // reference: https://en.cppreference.com/w/cpp/io/basic_istream/read
+            size_t size {range_end - range_start + 1};
+            std::string tmp (size, '\0');
+            fin.seekg(range_start, fin.beg);
+            fin.read(&tmp[0], size);
+
+            buf << tmp;
+
+            success_handle_range = true;
+            resp.prepare_status_code(http::HTTP_STATUS_Partial_Content);
+            resp.add_header(http::HTTP_HEADER_Content_Range, "bytes " + std::to_string(range_start) + "-" + std::to_string(range_end) + "/" + std::to_string(file_size));
+        }
+        catch (...) {
+            std::cerr << "Error on parsing \"Range:\"" << std::endl;
+        }
+    }
+
+    if (!success_handle_range) {
+        buf << fin.rdbuf();
+    }
+
+    resp.add_header(http::HTTP_HEADER_Accept_Range, "bytes");
 
     try {
         resp.prepare_body(buf.str(), http::file_ext2content_type.at(file_path.extension()));

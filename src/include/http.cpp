@@ -228,6 +228,11 @@ std::string Request::get_py_handler_string () {
 }
 
 
+HTTP_Header& Request::get_http_headers () {
+    return headers_;
+}
+
+
 bool Request::has_error () {
     return has_error_;
 }
@@ -330,6 +335,12 @@ bool Response::prepare_status_code (http_status_code code) {
         return true;
     }
 
+    case HTTP_STATUS_Partial_Content: {
+
+        http_status_code_ = code;
+        return true;
+    }
+
     default: {
         try {
             std::cerr << "[warn] prepare_status_code " << http_status2str.at(code) << " not implemented" << std::endl;
@@ -423,7 +434,7 @@ bool Response::send (int clientfd) {
 
     // message-body
     if (body_.size() != 0 && fwrite(body_.c_str(), body_.size(), 1, fp) != 1) {
-        set_error("error on fwrite (body)");
+        set_error("error on fwrite (body) (if happens on <video> or <audio>, the client possibly closes the connection after obtain the file size");
         return false;
     }
 

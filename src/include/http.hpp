@@ -44,6 +44,7 @@ public:
     bool receive_and_parse ();
     std::string get_http_version ();
     std::string get_path ();
+    HTTP_Header& get_http_headers ();
 
     bool has_error ();
     std::tuple<http_status_code, std::string> get_error ();

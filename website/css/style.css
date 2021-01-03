@@ -174,3 +174,7 @@ main {
     justify-content: flex-end;
     align-items: center;
 }
+
+video, audio {
+    width: 100%;
+}

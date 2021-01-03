@@ -26,6 +26,8 @@ enum http_header {
     HTTP_HEADER_Content_Length,
     HTTP_HEADER_Content_Type,
     HTTP_HEADER_Range,
+    HTTP_HEADER_Accept_Range,
+    HTTP_HEADER_Content_Range,
 };
 const std::unordered_map<std::string, http_header> str2header{
     {"Accept", HTTP_HEADER_Accept},
@@ -33,6 +35,8 @@ const std::unordered_map<std::string, http_header> str2header{
     {"Content-Length", HTTP_HEADER_Content_Length},
     {"Content-Type", HTTP_HEADER_Content_Type},
     {"Range", HTTP_HEADER_Range},
+    {"Accept-Ranges", HTTP_HEADER_Accept_Range},
+    {"Content-Range", HTTP_HEADER_Content_Range},
 };
 const std::unordered_map<http_header, std::string> header2str{
     {HTTP_HEADER_Accept, "Accept"},
@@ -40,6 +44,8 @@ const std::unordered_map<http_header, std::string> header2str{
     {HTTP_HEADER_Content_Length, "Content-Length"},
     {HTTP_HEADER_Content_Type, "Content-Type"},
     {HTTP_HEADER_Range, "Range"},
+    {HTTP_HEADER_Accept_Range, "Accept-Ranges"},
+    {HTTP_HEADER_Content_Range, "Content-Range"},
 };
 
 
@@ -48,6 +54,7 @@ enum http_status_code {
     empty_status_code = 0,
 
     HTTP_STATUS_OK = 200,
+    HTTP_STATUS_Partial_Content = 206,
 
     HTTP_STATUS_Bad_Request = 400,
     HTTP_STATUS_Not_Found = 404,
@@ -58,6 +65,7 @@ enum http_status_code {
 };
 const std::unordered_map<http_status_code, std::string> http_status2str{
     {HTTP_STATUS_OK, "OK"},
+    {HTTP_STATUS_Partial_Content, "Partial Content"},
 
     {HTTP_STATUS_Bad_Request, "Bad Request"},
     {HTTP_STATUS_Not_Found, "Not Found"},
@@ -75,6 +83,8 @@ const std::unordered_map<std::string, std::string> file_ext2content_type{
     {".txt", "text/plain"},
     {".jpg", "image/jpeg"},
     {".jpeg", "image/jpeg"},
+    {".mp4", "video/mp4"},
+    {".mp3", "audio/mpeg"},
 };
 
 
