@@ -145,6 +145,8 @@ main {
 }
 
 #chat-app .chat-content {
+    box-sizing: border-box;
+    overflow-wrap: break-word;
     width: 100%;
     padding: 5px;
 }
